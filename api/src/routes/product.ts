@@ -107,48 +107,134 @@ const router = express.Router();
 
 let products: Product[] = [...seedProducts];
 
+export const resetProducts = () => {
+  products = [...seedProducts];
+};
+
+const parseProductId = (value: string) => {
+  const id = parseInt(value, 10);
+  return Number.isNaN(id) ? null : id;
+};
+
+const validateProductPayload = (payload: any): string[] => {
+  const errors: string[] = [];
+  if (typeof payload !== 'object' || payload === null) {
+    errors.push('Payload must be an object');
+    return errors;
+  }
+
+  const requiredFields: Array<keyof Product> = [
+    'productId',
+    'supplierId',
+    'name',
+    'description',
+    'price',
+    'sku',
+    'unit',
+    'imgName'
+  ];
+
+  requiredFields.forEach((field) => {
+    if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
+      errors.push(`${field} is required`);
+    }
+  });
+
+  if (payload.price !== undefined && typeof payload.price !== 'number') {
+    errors.push('price must be a number');
+  }
+
+  if (payload.productId !== undefined && typeof payload.productId !== 'number') {
+    errors.push('productId must be a number');
+  }
+
+  if (payload.supplierId !== undefined && typeof payload.supplierId !== 'number') {
+    errors.push('supplierId must be a number');
+  }
+
+  return errors;
+};
+
 // Create a new product
 router.post('/', (req, res) => {
+  const validationErrors = validateProductPayload(req.body);
+  if (validationErrors.length) {
+    res.status(422).json({ errors: validationErrors });
+    return;
+  }
+
   const newProduct: Product = req.body;
   products.push(newProduct);
   res.status(201).json(newProduct);
 });
 
 // Get all products
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json(products);
 });
 
 // Get a product by ID
 router.get('/:id', (req, res) => {
-  const product = products.find(p => p.productId === parseInt(req.params.id));
+  const id = parseProductId(req.params.id);
+  if (id === null) {
+    res.status(400).send('Invalid product ID');
+    return;
+  }
+
+  const product = products.find((p) => p.productId === id);
   if (product) {
     res.json(product);
-  } else {
-    res.status(404).send('Product not found');
+    return;
   }
+
+  res.status(404).send('Product not found');
 });
 
 // Update a product by ID
 router.put('/:id', (req, res) => {
-  const index = products.findIndex(p => p.productId === parseInt(req.params.id));
+  const id = parseProductId(req.params.id);
+  if (id === null) {
+    res.status(400).send('Invalid product ID');
+    return;
+  }
+
+  if (req.body?.productId !== id) {
+    res.status(400).send('Product ID in path and body must match');
+    return;
+  }
+
+  const validationErrors = validateProductPayload(req.body);
+  if (validationErrors.length) {
+    res.status(422).json({ errors: validationErrors });
+    return;
+  }
+
+  const index = products.findIndex((p) => p.productId === id);
   if (index !== -1) {
     products[index] = req.body;
     res.json(products[index]);
-  } else {
-    res.status(404).send('Product not found');
+    return;
   }
+
+  res.status(404).send('Product not found');
 });
 
 // Delete a product by ID
 router.delete('/:id', (req, res) => {
-  const index = products.findIndex(p => p.productId === parseInt(req.params.id));
+  const id = parseProductId(req.params.id);
+  if (id === null) {
+    res.status(400).send('Invalid product ID');
+    return;
+  }
+
+  const index = products.findIndex((p) => p.productId === id);
   if (index !== -1) {
     products.splice(index, 1);
     res.status(204).send();
-  } else {
-    res.status(404).send('Product not found');
+    return;
   }
+
+  res.status(404).send('Product not found');
 });
 
 export default router;

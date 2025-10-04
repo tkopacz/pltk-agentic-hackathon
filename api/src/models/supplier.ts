@@ -13,5 +13,10 @@
  *           description: The name of the supplier
  */
 export interface Supplier {
+    supplierId: number;
     name: string;
+    description: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
 }

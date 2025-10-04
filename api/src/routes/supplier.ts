@@ -107,48 +107,115 @@ const router = express.Router();
 
 let suppliers: Supplier[] = [...seedSuppliers];
 
+export const resetSuppliers = () => {
+    suppliers = [...seedSuppliers];
+};
+
+const parseSupplierId = (value: string) => {
+    const id = parseInt(value, 10);
+    return Number.isNaN(id) ? null : id;
+};
+
+const validateSupplierPayload = (payload: any): string[] => {
+    const errors: string[] = [];
+    if (typeof payload !== 'object' || payload === null) {
+        errors.push('Payload must be an object');
+        return errors;
+    }
+
+    if (payload.supplierId === undefined || payload.supplierId === null) {
+        errors.push('supplierId is required');
+    } else if (typeof payload.supplierId !== 'number') {
+        errors.push('supplierId must be a number');
+    }
+
+    if (!payload.name) {
+        errors.push('name is required');
+    }
+
+    return errors;
+};
+
 // Create a new supplier
 router.post('/', (req, res) => {
+    const validationErrors = validateSupplierPayload(req.body);
+    if (validationErrors.length) {
+        res.status(422).json({ errors: validationErrors });
+        return;
+    }
+
     const newSupplier = req.body as Supplier;
     suppliers.push(newSupplier);
     res.status(201).json(newSupplier);
 });
 
 // Get all suppliers
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
     res.json(suppliers);
 });
 
 // Get a supplier by ID
 router.get('/:id', (req, res) => {
-    const supplier = suppliers.find(s => s.supplierId === parseInt(req.params.id));
+    const id = parseSupplierId(req.params.id);
+    if (id === null) {
+        res.status(400).send('Invalid supplier ID');
+        return;
+    }
+
+    const supplier = suppliers.find(s => s.supplierId === id);
     if (supplier) {
         res.json(supplier);
-    } else {
-        res.status(404).send('Supplier not found');
+        return;
     }
+
+    res.status(404).send('Supplier not found');
 });
 
 // Update a supplier by ID
 router.put('/:id', (req, res) => {
-    const index = suppliers.findIndex(s => s.supplierId === parseInt(req.params.id));
+    const id = parseSupplierId(req.params.id);
+    if (id === null) {
+        res.status(400).send('Invalid supplier ID');
+        return;
+    }
+
+    if (req.body?.supplierId !== id) {
+        res.status(400).send('Supplier ID in path and body must match');
+        return;
+    }
+
+    const validationErrors = validateSupplierPayload(req.body);
+    if (validationErrors.length) {
+        res.status(422).json({ errors: validationErrors });
+        return;
+    }
+
+    const index = suppliers.findIndex(s => s.supplierId === id);
     if (index !== -1) {
         suppliers[index] = req.body;
         res.json(suppliers[index]);
-    } else {
-        res.status(404).send('Supplier not found');
+        return;
     }
+
+    res.status(404).send('Supplier not found');
 });
 
 // Delete a supplier by ID
 router.delete('/:id', (req, res) => {
-    const index = suppliers.findIndex(s => s.supplierId === parseInt(req.params.id));
+    const id = parseSupplierId(req.params.id);
+    if (id === null) {
+        res.status(400).send('Invalid supplier ID');
+        return;
+    }
+
+    const index = suppliers.findIndex(s => s.supplierId === id);
     if (index !== -1) {
         suppliers.splice(index, 1);
         res.status(204).send();
-    } else {
-        res.status(404).send('Supplier not found');
+        return;
     }
+
+    res.status(404).send('Supplier not found');
 });
 
 export default router;
