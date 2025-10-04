@@ -5,6 +5,7 @@ import { Navigate } from 'react-router-dom';
 import ProductForm from '../entity/product/ProductForm';
 import axios from 'axios';
 import { api } from '../../api/config';
+import type { Product as BaseProduct } from '../../types/product';
 
 interface Supplier {
   supplierId: number;
@@ -15,17 +16,8 @@ interface Supplier {
   phone: string;
 }
 
-interface Product {
-  productId: number;
-  supplierId: number;
-  name: string;
-  description: string;
-  price: number;
-  sku: string;
-  unit: string;
-  imgName: string;
+interface Product extends BaseProduct {
   supplier?: Supplier;
-  discount?: number;
 }
 
 type SortField = 'name' | 'price' | 'sku' | 'unit' | 'supplier';
