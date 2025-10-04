@@ -1,55 +1,59 @@
 # Model Comparison Table
 
-This comparison was genereated using the custom prompt file [model-compare.prompt.md](../.github/prompts/model-compare.prompt.md) and using `Gemini 2.5 Pro`. You can generatae you own using `/model-compare` in the Copilot Chat.
+This comparison was generated using the custom prompt [model-compare.prompt.md](../.github/prompts/model-compare.prompt.md) and data from the GitHub Docs pages cited below.
 
 > [!NOTE]
-> As the model world is moving quickly, the information in this predefined document might be outdated. Use the `/model-compare` command as described above to get a file with the latest information.
+> Model availability, multipliers, and preview status change frequently. Re-run `/model-compare` to refresh this table with the latest GitHub Copilot documentation.
 
 ## 1. Balance Between Performance and Cost
 
-**Pros:** Good all-rounders, versatile, cost-effective options.
+**Pros:** Versatile defaults, low premium usage, reliable structured output.
 
-| Model             | Use Case / Differentiator               | GA/Preview | Special Abilities      | Multiplier         |
-| ----------------- | --------------------------------------- | ---------- | ---------------------- | ------------------ |
-| GPT-4.1           | Default for common dev, broad knowledge | ✅          | Multilingual, 👓 Visual | 0 (paid), 1 (free) |
-| Claude 3.7 Sonnet | Advanced dev, architectural planning    | ✅          | -                      | 1                  |
+| Model | Use Case / Differentiator | GA/Preview | Special Abilities | Multiplier |
+| --- | --- | --- | --- | --- |
+| GPT-4.1 | Balanced default for everyday features, reviews, and docs | ✅ | 🕹 Agent mode, 👓 Vision | 0× (paid) / 1× (free) |
+| GPT-5-Codex | Higher-fidelity completions for longer diffs and refactors | 🚧 | 🕹 Agent mode | 1× (paid) |
+| Claude Sonnet 4 | Consistent tone & formatting for specs, docs, and summaries | ✅ | 🕹 Agent mode, 👓 Vision | 1× (paid) |
 
 ## 2. Fast, Low-Cost Support for Basic Tasks
 
-**Pros:** Speed 🚀, low latency, cost savings 💸, simple logic, quick feedback.
+**Pros:** ⚡ Ultra-low latency, 💸 premium-efficient, great for repetitive edits.
 
-| Model             | Use Case / Differentiator                 | GA/Preview | Special Abilities | Multiplier |
-| ----------------- | ----------------------------------------- | ---------- | ----------------- | ---------- |
-| o4-mini           | Fastest, most efficient for basic tasks   | 🚧          | -                 | -          |
-| Claude 3.5 Sonnet | Everyday coding, documentation, low cost  | ✅          | -                 | 1          |
-| o3-mini           | Fast, concise for simple/repetitive tasks | ✅          | -                 | 0.33       |
+| Model | Use Case / Differentiator | GA/Preview | Special Abilities | Multiplier |
+| --- | --- | --- | --- | --- |
+| o4-mini | Instant snippets & boilerplate cleanup (sunsetting Oct 23 2025) | ✅ | ⚡ Low latency focus | 0.33× (paid) |
+| Grok Code Fast 1 | Quick Q&A across repos with playful outputs | 🚧 | 🕹 Agent mode | 0.25× (paid) |
+| Claude Sonnet 3.5 | Fast summaries, docs, and small code fixes | ✅ | 🕹 Agent mode, 👓 Vision | 1× (paid/free) |
 
 ## 3. Deep Reasoning & Complex Coding Challenges
 
-**Pros:** Advanced logic, multi-step problem solving, high-quality code generation.
+**Pros:** 🧠 Multi-step logic, 📚 cross-file awareness, 🔍 precise debugging.
 
-| Model          | Use Case / Differentiator                    | GA/Preview | Special Abilities | Multiplier |
-| -------------- | -------------------------------------------- | ---------- | ----------------- | ---------- |
-| GPT-4.5        | Multi-step logic, nuanced, high-quality code | ✅          | -                 | 50 💰       |
-| o3             | Deepest reasoning, debugging, complex tasks  | 🚧          | -                 | -          |
-| o1             | Deep logic, debugging, root cause analysis   | ✅          | -                 | 10 💰       |
-| Gemini 2.5 Pro | Advanced algorithms, long-context research   | 🚧          | -                 | 1          |
+| Model | Use Case / Differentiator | GA/Preview | Special Abilities | Multiplier |
+| --- | --- | --- | --- | --- |
+| GPT-5 mini | Step-by-step analysis with minimal premium spend | ✅ | 🧠 Reasoning, 👓 Vision | 0× (paid) / 1× (free) |
+| GPT-5 | Architecture reviews, design validation, and complex refactors | ✅ | 🧠 Reasoning | 1× (paid) |
+| o3 | Root-cause hunts & algorithm design (sunsetting Oct 23 2025) | ✅ | 🧠 Reasoning | 1× (paid) |
+| Claude Sonnet 4.5 | Preview hybrid reasoning for multi-stage agent plans | 🚧 | 🕹 Agent mode | 1× (paid) |
+| Gemini 2.5 Pro | Research-grade long-context investigations | ✅ | 👓 Vision, 🧪 Analysis | 1× (paid) |
 
 ## 4. Multimodal Inputs & Real-Time Performance
 
-**Pros:** Visual input 👓, real-time interaction, UI/diagram analysis.
+**Pros:** 👓 Visual inspection, 🎨 UI triage, 🗣️ conversational prototyping.
 
-| Model            | Use Case / Differentiator                     | GA/Preview | Special Abilities      | Multiplier |
-| ---------------- | --------------------------------------------- | ---------- | ---------------------- | ---------- |
-| GPT-4o           | Lightweight dev, conversational, visual input | ✅          | 👓 Visual, Multilingual | 1          |
-| Gemini 2.0 Flash | UI inspection, diagram analysis, visual bugs  | ✅          | 👓 Visual               | 0.25 💸     |
+| Model | Use Case / Differentiator | GA/Preview | Special Abilities | Multiplier |
+| --- | --- | --- | --- | --- |
+| GPT-4o | Voice & vision-first prototyping with multilingual support | ✅ | 👓 Vision, 🌐 Multilingual | 0× (paid) / 1× (free) |
+| Gemini 2.0 Flash | Real-time screenshot and UI feedback (sunsetting Oct 23 2025) | ✅ | 👓 Vision, ⚡ Low latency | 0.25× (paid) / 1× (free) |
+| Claude Opus 4.1 | High-fidelity visual reasoning for complex interfaces | ✅ | 👓 Vision, 🧠 Reasoning | 10× 💰 (paid) |
 
 ---
 
 ## References
 
 - [Choosing the right AI model for your task](https://docs.github.com/en/copilot/using-github-copilot/ai-models/choosing-the-right-ai-model-for-your-task)
-- [About premium requests](https://docs.github.com/en/enterprise-cloud@latest/copilot/managing-copilot/monitoring-usage-and-entitlements/about-premium-requests?versionId=enterprise-cloud%40latest)
+- [Supported AI models in GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/supported-models)
+- [Requests in GitHub Copilot](https://docs.github.com/en/enterprise-cloud@latest/copilot/managing-copilot/monitoring-usage-and-entitlements/about-premium-requests?versionId=enterprise-cloud@latest)
 
 ---
 
@@ -57,53 +61,25 @@ This comparison was genereated using the custom prompt file [model-compare.promp
 
 ```mermaid
 graph LR
-    %% Performance Category
-    subgraph "Performance (Faster - Lower Cost/Complexity)"
-      o4m["o4-mini<br/>🚀💸<br/>(Preview)"]
-      g2f["Gemini 2.0 Flash<br/>🚀💸👓<br/>(GA)"]
-      o3m["o3-mini<br/>🚀💸<br/>(GA)"]
-      c35s["Claude 3.5 Sonnet<br/>🚀<br/>(GA)"]
-      o4m --> g2f
-      g2f --> o3m
-      o3m --> c35s
-    end
+    %% Left = faster / lower cost, Right = higher quality & premium usage
+    o4m["o4-mini<br/>0.33×<br/>✅"] --> grok["Grok Code Fast 1<br/>0.25×<br/>🚧"]
+    grok --> gpt41["GPT-4.1<br/>0× / 1×<br/>✅"]
+    gpt41 --> gpt5c["GPT-5-Codex<br/>1×<br/>🚧"]
+    gpt5c --> cs4["Claude Sonnet 4<br/>1×<br/>✅"]
+    cs4 --> gpt5m["GPT-5 mini<br/>0× / 1×<br/>✅"]
+    gpt5m --> gpt5["GPT-5<br/>1×<br/>✅"]
+    gpt5 --> cs45["Claude Sonnet 4.5<br/>1×<br/>🚧"]
+    cs45 --> g25["Gemini 2.5 Pro<br/>1×<br/>✅"]
+    g25 --> co41["Claude Opus 4.1<br/>10×💰<br/>✅"]
 
-    %% Balanced Category
-    subgraph "Balanced"
-    direction TB
-    g41["GPT-4.1<br/>✅<br/>(Base Model)"]
-    g4o["GPT-4o<br/>👓<br/>(GA)"]
-    g41 --> g4o
-    end
-
-    %% Quality & Cost Category
-    subgraph "Quality & Cost (Higher - Higher Cost/Complexity)"
-    direction TB
-    c37s["Claude 3.7 Sonnet<br/>✅<br/>(GA)"]
-    g25p["Gemini 2.5 Pro<br/>🚧<br/>(Preview)"]
-    o1["o1<br/>💰<br/>(GA)"]
-    o3["o3<br/>🚧💰<br/>(Preview)"]
-    g45["GPT-4.5<br/>✅💰💰<br/>(GA)"]
-    c37s --> g25p
-    g25p --> o1
-    o1 --> o3
-    o3 --> g45
-    end
-
-    %% Horizontal connections between categories
-    c35s -.-> g41
-    g4o -.-> c37s
-
-    %% Styling
-    style o4m fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-    style g2f fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-    style o3m fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-    style c35s fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-    style g41 fill:#9cf,stroke:#333,stroke-width:2px,color:#000
-    style g4o fill:#9cf,stroke:#333,stroke-width:2px,color:#000
-    style c37s fill:#9fc,stroke:#333,stroke-width:2px,color:#000
-    style g25p fill:#9fc,stroke:#333,stroke-width:2px,color:#000
-    style o1 fill:#9fc,stroke:#333,stroke-width:2px,color:#000
-    style o3 fill:#9fc,stroke:#333,stroke-width:2px,color:#000
-    style g45 fill:#9fc,stroke:#333,stroke-width:2px,color:#000
+    style o4m fill:#ffffff,stroke:#111111,color:#111111
+    style grok fill:#ffffff,stroke:#111111,color:#111111
+    style gpt41 fill:#cdeafe,stroke:#111111,color:#111111
+    style gpt5c fill:#fde2ff,stroke:#111111,color:#111111
+    style cs4 fill:#fff4d6,stroke:#111111,color:#111111
+    style gpt5m fill:#dbf5ff,stroke:#111111,color:#111111
+    style gpt5 fill:#dbf5ff,stroke:#111111,color:#111111
+    style cs45 fill:#fde2ff,stroke:#111111,color:#111111
+    style g25 fill:#e8fdd8,stroke:#111111,color:#111111
+    style co41 fill:#f9d6d6,stroke:#111111,color:#111111
 ```
