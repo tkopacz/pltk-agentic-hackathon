@@ -159,6 +159,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, initialState);
+  const [isLoaded, setIsLoaded] = React.useState(false);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -171,12 +172,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Error loading cart from localStorage:', error);
       }
     }
+    setIsLoaded(true);
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes (after initial load)
   useEffect(() => {
-    localStorage.setItem('octocat-cart', JSON.stringify(cart));
-  }, [cart]);
+    if (isLoaded) {
+      localStorage.setItem('octocat-cart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addToCart = (product: Product, quantity: number) => {
     dispatch({ type: 'ADD_TO_CART', payload: { product, quantity } });
