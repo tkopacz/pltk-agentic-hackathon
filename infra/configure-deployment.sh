@@ -1,5 +1,8 @@
 #!/bin/bash
-
+#-------------------------------
+# UTF-8 encoding
+# check line endings if on WSL - should be LF not CRLF
+#-------------------------------
 # Script to configure deployment environment in Azure and Environments/Variables for Actions
 # Usage: ./configure-deployment.sh <github-org>/<github-repo> [resource-group-staging] [resource-group-prod] [location-staging] [location-prod]
 
