@@ -39,15 +39,16 @@ const initialState: CartState = {
   itemCount: 0,
   subtotal: 0,
   discount: 0,
-  shipping: 10, // Fixed shipping cost
+  shipping: 0,
   grandTotal: 0,
 };
 
-const calculateTotals = (items: CartItem[]): Omit<CartState, 'items'> => {
+const calculateTotals = (items: CartItem[], currentDiscount: number = 0): Omit<CartState, 'items'> => {
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.total, 0);
-  const shipping = subtotal > 0 ? 10 : 0; // Free shipping threshold could be added
-  const discount = subtotal * 0.05; // 5% discount as shown in the design
+  // Free shipping over $100, otherwise $25
+  const shipping = subtotal > 0 ? (subtotal >= 100 ? 0 : 25) : 0;
+  const discount = currentDiscount;
   const grandTotal = subtotal - discount + shipping;
 
   return {
@@ -98,7 +99,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems),
+        ...calculateTotals(newItems, state.discount),
       };
     }
 
@@ -109,7 +110,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems),
+        ...calculateTotals(newItems, state.discount),
       };
     }
 
@@ -132,7 +133,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems),
+        ...calculateTotals(newItems, state.discount),
       };
     }
 

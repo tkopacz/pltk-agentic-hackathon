@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
 import { useState } from 'react';
+import { api } from '../api/config';
 
 export default function Navigation() {
   const { isLoggedIn, isAdmin, logout } = useAuth();
   const { darkMode, toggleTheme } = useTheme();
+  const { cart } = useCart();
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [showCartPreview, setShowCartPreview] = useState(false);
 
   return (
     <nav className={`${darkMode ? 'bg-dark/95' : 'bg-white/95'} backdrop-blur-sm fixed w-full z-50 shadow-md transition-colors duration-300`}>
@@ -68,6 +72,93 @@ export default function Navigation() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            {/* Cart Icon with Badge and Hover Preview */}
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowCartPreview(true)}
+              onMouseLeave={() => setShowCartPreview(false)}
+            >
+              <Link
+                to="/cart"
+                className={`relative p-2 rounded-full transition-all duration-300 ${
+                  darkMode 
+                    ? 'hover:shadow-[0_0_15px_rgba(118,184,82,0.5)]' 
+                    : 'hover:shadow-[0_0_15px_rgba(118,184,82,0.3)]'
+                } focus:outline-none`}
+                aria-label={`Shopping cart with ${cart.itemCount} items`}
+              >
+                <svg
+                  className={`h-6 w-6 ${darkMode ? 'text-light' : 'text-gray-700'} transition-colors`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+                {cart.itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-accent text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cart.itemCount > 9 ? '9+' : cart.itemCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Hover Preview Tooltip */}
+              {showCartPreview && cart.itemCount > 0 && (
+                <div 
+                  className={`absolute right-0 mt-2 w-80 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl border ${darkMode ? 'border-gray-700' : 'border-gray-200'} z-50 transition-colors duration-300`}
+                  style={{ animation: 'fadeIn 0.2s ease-in' }}
+                >
+                  <div className="p-4">
+                    <h3 className={`font-semibold mb-3 ${darkMode ? 'text-light' : 'text-gray-800'} transition-colors duration-300`}>
+                      Cart Preview ({cart.itemCount} items)
+                    </h3>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {cart.items.slice(0, 2).map((item) => (
+                        <div key={item.product.productId} className="flex gap-3 items-center">
+                          <img
+                            src={`${api.baseURL}/images/${item.product.imgName}`}
+                            alt={item.product.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                          <div className="flex-grow min-w-0">
+                            <p className={`text-sm font-medium truncate ${darkMode ? 'text-light' : 'text-gray-800'} transition-colors duration-300`}>
+                              {item.product.name}
+                            </p>
+                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} transition-colors duration-300`}>
+                              Qty: {item.quantity} × ${item.unitPrice.toFixed(2)}
+                            </p>
+                          </div>
+                          <span className={`text-sm font-semibold ${darkMode ? 'text-primary' : 'text-primary'}`}>
+                            ${item.total.toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                      {cart.items.length > 2 && (
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} transition-colors duration-300`}>
+                          +{cart.items.length - 2} more items
+                        </p>
+                      )}
+                    </div>
+                    <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
+                      <span className={`font-semibold ${darkMode ? 'text-light' : 'text-gray-800'} transition-colors duration-300`}>Total:</span>
+                      <span className="text-lg font-bold text-primary">${cart.grandTotal.toFixed(2)}</span>
+                    </div>
+                    <Link
+                      to="/cart"
+                      className="block mt-3 w-full bg-primary hover:bg-accent text-white text-center py-2 rounded-md font-medium transition-colors"
+                    >
+                      View Cart
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full focus:outline-none transition-colors"
