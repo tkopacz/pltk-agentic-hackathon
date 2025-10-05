@@ -3,10 +3,10 @@ name: CD - Deploy to Azure
 on:
   pull_request:
     branches:
-      - main
+      - release
   push:
     branches:
-      - main
+      - release
 
 permissions:
   id-token: write
