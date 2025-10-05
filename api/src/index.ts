@@ -2,6 +2,7 @@ import express from 'express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import cors from 'cors';
+import { initTAO, observe } from '@tao/core';
 import deliveryRoutes from './routes/delivery';
 import orderDetailDeliveryRoutes from './routes/orderDetailDelivery';
 import productRoutes from './routes/product';
@@ -13,6 +14,24 @@ import supplierRoutes from './routes/supplier';
 
 const app = express();
 const port = process.env.PORT || 3000;
+const environment = process.env.NODE_ENV ?? 'development';
+
+initTAO({
+  serviceName: 'octocat-supplychain-api',
+  environment,
+  metrics: {
+    backend: 'prometheus',
+    endpoint: '/metrics'
+  },
+  tracing: {
+    backend: 'jaeger',
+    samplingRate: environment === 'production' ? 0.2 : 1.0
+  },
+  logging: {
+    level: process.env.LOG_LEVEL ?? (environment === 'production' ? 'info' : 'debug'),
+    format: 'json'
+  }
+});
 
 // Parse CORS origins from environment variable if available
 const corsOrigins = process.env.API_CORS_ORIGINS 
@@ -65,6 +84,7 @@ app.get('/api-docs.json', (req, res) => {
 });
 
 app.use(express.json());
+app.use(observe());
 
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/order-detail-deliveries', orderDetailDeliveryRoutes);

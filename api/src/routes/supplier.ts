@@ -102,6 +102,7 @@
 import express from 'express';
 import { Supplier } from '../models/supplier';
 import { suppliers as seedSuppliers } from '../seedData';
+import { withSupplierObservability } from '../observability/supplierObservability';
 
 const router = express.Router();
 
@@ -137,7 +138,7 @@ const validateSupplierPayload = (payload: any): string[] => {
 };
 
 // Create a new supplier
-router.post('/', (req, res) => {
+router.post('/', withSupplierObservability('create', (req, res) => {
     const validationErrors = validateSupplierPayload(req.body);
     if (validationErrors.length) {
         res.status(422).json({ errors: validationErrors });
@@ -147,15 +148,15 @@ router.post('/', (req, res) => {
     const newSupplier = req.body as Supplier;
     suppliers.push(newSupplier);
     res.status(201).json(newSupplier);
-});
+}));
 
 // Get all suppliers
-router.get('/', (_req, res) => {
+router.get('/', withSupplierObservability('list', (_req, res) => {
     res.json(suppliers);
-});
+}));
 
 // Get a supplier by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', withSupplierObservability('get', (req, res) => {
     const id = parseSupplierId(req.params.id);
     if (id === null) {
         res.status(400).send('Invalid supplier ID');
@@ -169,10 +170,10 @@ router.get('/:id', (req, res) => {
     }
 
     res.status(404).send('Supplier not found');
-});
+}));
 
 // Update a supplier by ID
-router.put('/:id', (req, res) => {
+router.put('/:id', withSupplierObservability('update', (req, res) => {
     const id = parseSupplierId(req.params.id);
     if (id === null) {
         res.status(400).send('Invalid supplier ID');
@@ -198,10 +199,10 @@ router.put('/:id', (req, res) => {
     }
 
     res.status(404).send('Supplier not found');
-});
+}));
 
 // Delete a supplier by ID
-router.delete('/:id', (req, res) => {
+router.delete('/:id', withSupplierObservability('delete', (req, res) => {
     const id = parseSupplierId(req.params.id);
     if (id === null) {
         res.status(400).send('Invalid supplier ID');
@@ -216,6 +217,6 @@ router.delete('/:id', (req, res) => {
     }
 
     res.status(404).send('Supplier not found');
-});
+}));
 
 export default router;
