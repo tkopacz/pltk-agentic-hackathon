@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { Product } from '../api/config';
+import { Product } from '../types/product';
 
 export interface CartItem {
   product: Product;
@@ -39,14 +39,15 @@ const initialState: CartState = {
   itemCount: 0,
   subtotal: 0,
   discount: 0,
-  shipping: 10, // Fixed shipping cost
+  shipping: 0,
   grandTotal: 0,
 };
 
 const calculateTotals = (items: CartItem[]): Omit<CartState, 'items'> => {
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.total, 0);
-  const shipping = subtotal > 0 ? 10 : 0; // Free shipping threshold could be added
+  // Free shipping over $100, otherwise $25
+  const shipping = subtotal > 0 ? (subtotal >= 100 ? 0 : 25) : 0;
   const discount = subtotal * 0.05; // 5% discount as shown in the design
   const grandTotal = subtotal - discount + shipping;
 
