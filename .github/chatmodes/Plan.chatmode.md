@@ -1,6 +1,6 @@
 ---
 description: 'Plan changes to the codebase without changing any code.'
-tools: ['codebase', 'usages', 'changes', 'fetch', 'githubRepo', 'search']
+tools: ['search', 'usages', 'changes', 'fetch', 'githubRepo', 'search', 'search', 'search']
 ---
 
 # Plan changes to the codebase
