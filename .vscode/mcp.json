@@ -31,10 +31,7 @@
         },
         "github-remote": {
             "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {
-                "Authorization": "Bearer ${input:github_token}"
-            }            
+            "url": "https://api.githubcopilot.com/mcp/"          
         },
         "Azure MCP Server": {
             "command": "npx",
