@@ -102,7 +102,8 @@
 import express from 'express';
 import { Delivery } from '../models/delivery';
 import { deliveries as seedDeliveries } from '../seedData';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+import shellQuote from 'shell-quote';
 
 const router = express.Router();
 
@@ -134,12 +135,33 @@ router.get('/:id', (req, res) => {
 router.put('/:id/status', (req, res) => {
   const { status, notifyCommand } = req.body;
   const delivery = deliveries.find(d => d.deliveryId === parseInt(req.params.id));
-  
+
+  // Allowlist of safe system commands to run for notifications
+  const allowedCommands = new Set(['notify-send']);
+
   if (delivery) {
     delivery.status = status;
-    
+
     if (notifyCommand) {
-      exec(notifyCommand, (error, stdout, stderr) => {
+      // Safely parse the notifyCommand string into [command, ...args]
+      let parsed;
+      try {
+        parsed = shellQuote.parse(notifyCommand);
+      } catch (err) {
+        return res.status(400).json({ error: 'Invalid notifyCommand format.' });
+      }
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return res.status(400).json({ error: 'Command is empty.' });
+      }
+
+      const command = parsed[0];
+      const args = parsed.slice(1);
+
+      if (!allowedCommands.has(command)) {
+        return res.status(400).json({ error: 'Command not allowed.' });
+      }
+
+      execFile(command, args, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing command: ${error}`);
           return res.status(500).json({ error: error.message });
