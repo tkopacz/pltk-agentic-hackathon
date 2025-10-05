@@ -1,20 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useQuery } from 'react-query';
-import { api } from '../../../api/config';
+import { api, Product } from '../../../api/config';
 import { useTheme } from '../../../context/ThemeContext';
-
-interface Product {
-  productId: number;
-  name: string;
-  description: string;
-  price: number;
-  imgName: string;
-  sku: string;
-  unit: string;
-  supplierId: number;
-  discount?: number;
-}
+import { useCart } from '../../../context/CartContext';
 
 const fetchProducts = async (): Promise<Product[]> => {
   const { data } = await axios.get(`${api.baseURL}${api.endpoints.products}`);
@@ -28,6 +17,7 @@ export default function Products() {
   const [showModal, setShowModal] = useState(false);
   const { data: products, isLoading, error } = useQuery('products', fetchProducts);
   const { darkMode } = useTheme();
+  const { addToCart } = useCart();
 
   const filteredProducts = products?.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,9 +33,9 @@ export default function Products() {
 
   const handleAddToCart = (productId: number) => {
     const quantity = quantities[productId] || 0;
-    if (quantity > 0) {
-      // TODO: Implement cart functionality
-      alert(`Added ${quantity} items to cart`);
+    const product = products?.find(p => p.productId === productId);
+    if (quantity > 0 && product) {
+      addToCart(product, quantity);
       setQuantities(prev => ({
         ...prev,
         [productId]: 0
