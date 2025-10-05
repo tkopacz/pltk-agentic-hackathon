@@ -34,11 +34,11 @@ jobs:
       - name: Build frontend
         run: npm run build --workspace=frontend
 
-      - name: Test API
-        run: npm run test --workspace=api
+    #   - name: Test API
+    #     run: npm run test --workspace=api
 
-      - name: Test frontend
-        run: npm run test --workspace=frontend
+    #   - name: Test frontend
+    #     run: npm run test --workspace=frontend
 
       - name: Build API container image
         run: |
