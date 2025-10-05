@@ -1,0 +1,55 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Build, Test, and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint frontend
+        run: npm run lint --workspace=frontend
+
+      - name: Build API
+        run: npm run build --workspace=api
+
+      - name: Build frontend
+        run: npm run build --workspace=frontend
+
+      - name: Test API
+        run: npm run test --workspace=api
+
+      - name: Test frontend
+        run: npm run test --workspace=frontend
+
+      - name: Build API container image
+        run: |
+          docker build \
+            --file api/Dockerfile \
+            --tag ghcr.io/${{ github.repository_owner }}/octocat-api:${{ github.sha }} \
+            api
+
+      - name: Build frontend container image
+        run: |
+          docker build \
+            --file frontend/Dockerfile \
+            --tag ghcr.io/${{ github.repository_owner }}/octocat-frontend:${{ github.sha }} \
+            frontend

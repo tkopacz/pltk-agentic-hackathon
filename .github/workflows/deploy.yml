@@ -1,0 +1,206 @@
+name: CD - Deploy to Azure
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+  deployments: write
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE_NAME: octocat-api
+  FRONTEND_IMAGE_NAME: octocat-frontend
+
+jobs:
+  build_api:
+    name: Build & Push API Image
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build API
+        run: npm run build --workspace=api
+
+      - name: Test API
+        run: npm run test --workspace=api
+
+      - name: Determine image tag
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_ENV
+          echo "image_tag=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build API container
+        run: |
+          docker build \
+            --file api/Dockerfile \
+            --tag ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.API_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }} \
+            api
+
+      - name: Push API container
+        run: docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.API_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
+
+  build_frontend:
+    name: Build & Push Frontend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint frontend
+        run: npm run lint --workspace=frontend
+
+      - name: Build frontend
+        run: npm run build --workspace=frontend
+
+      - name: Test frontend
+        run: npm run test --workspace=frontend
+
+      - name: Determine image tag
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_ENV
+          echo "image_tag=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build frontend container
+        run: |
+          docker build \
+            --file frontend/Dockerfile \
+            --tag ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }} \
+            frontend
+
+      - name: Push frontend container
+        run: docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
+
+  deploy_staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs:
+      - build_api
+      - build_frontend
+    environment:
+      name: Staging
+      url: ${{ steps.deploy.outputs.frontendUrl }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare environment variables
+        run: |
+          echo "IMAGE_TAG=${{ needs.build_api.outputs.image_tag }}" >> $GITHUB_ENV
+          echo "AZURE_RESOURCE_GROUP=${{ vars.AZURE_RESOURCE_GROUP }}" >> $GITHUB_ENV
+          echo "AZURE_ACR_NAME=${{ vars.AZURE_ACR_NAME }}" >> $GITHUB_ENV
+          echo "AZURE_SUBSCRIPTION_ID=${{ vars.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy infrastructure and containers
+        id: deploy
+        run: |
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+          deploymentName="octocat-${GITHUB_RUN_ID}-staging"
+          result=$(az deployment group create \
+            --name "$deploymentName" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --template-file infra/main.bicep \
+            --parameters @infra/parameters/staging.parameters.json \
+            --parameters acrName=$AZURE_ACR_NAME imageTag=$IMAGE_TAG)
+          echo "$result" > deployment.json
+          apiUrl=$(jq -r '.properties.outputs.apiHostname.value' deployment.json)
+          frontendUrl=$(jq -r '.properties.outputs.frontendHostname.value' deployment.json)
+          echo "apiUrl=$apiUrl" >> $GITHUB_OUTPUT
+          echo "frontendUrl=$frontendUrl" >> $GITHUB_OUTPUT
+
+  deploy_production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs:
+      - deploy_staging
+      - build_api
+    environment:
+      name: Production
+      url: ${{ steps.deploy.outputs.frontendUrl }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare environment variables
+        run: |
+          echo "IMAGE_TAG=${{ needs.build_api.outputs.image_tag }}" >> $GITHUB_ENV
+          echo "AZURE_RESOURCE_GROUP=${{ vars.AZURE_RESOURCE_GROUP_PROD }}" >> $GITHUB_ENV
+          echo "AZURE_ACR_NAME=${{ vars.AZURE_ACR_NAME }}" >> $GITHUB_ENV
+          echo "AZURE_SUBSCRIPTION_ID=${{ vars.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy infrastructure and containers
+        id: deploy
+        run: |
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+          deploymentName="octocat-${GITHUB_RUN_ID}-prod"
+          result=$(az deployment group create \
+            --name "$deploymentName" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --template-file infra/main.bicep \
+            --parameters @infra/parameters/production.parameters.json \
+            --parameters acrName=$AZURE_ACR_NAME imageTag=$IMAGE_TAG)
+          echo "$result" > deployment.json
+          apiUrl=$(jq -r '.properties.outputs.apiHostname.value' deployment.json)
+          frontendUrl=$(jq -r '.properties.outputs.frontendHostname.value' deployment.json)
+          echo "apiUrl=$apiUrl" >> $GITHUB_OUTPUT
+          echo "frontendUrl=$frontendUrl" >> $GITHUB_OUTPUT
