@@ -151,7 +151,7 @@ export default function Cart() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Subtotal ({cart.itemCount} items)
+                    Subtotal ({cart.itemCount} {cart.itemCount === 1 ? 'item' : 'items'})
                   </span>
                   <span className={`font-medium ${darkMode ? 'text-light' : 'text-gray-800'}`}>
                     ${cart.subtotal.toFixed(2)}
