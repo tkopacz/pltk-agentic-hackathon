@@ -39,15 +39,15 @@ const initialState: CartState = {
   itemCount: 0,
   subtotal: 0,
   discount: 0,
-  shipping: 10, // Fixed shipping cost
+  shipping: 0,
   grandTotal: 0,
 };
 
 const calculateTotals = (items: CartItem[]): Omit<CartState, 'items'> => {
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.total, 0);
-  const shipping = subtotal > 0 ? 10 : 0; // Free shipping threshold could be added
-  const discount = subtotal * 0.05; // 5% discount as shown in the design
+  const shipping = subtotal > 100 ? 0 : subtotal > 0 ? 25 : 0; // Free shipping over $100, $25 otherwise
+  const discount = 0; // No automatic discount
   const grandTotal = subtotal - discount + shipping;
 
   return {
@@ -159,6 +159,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, initialState);
+  const [isLoaded, setIsLoaded] = React.useState(false);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -171,12 +172,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Error loading cart from localStorage:', error);
       }
     }
+    setIsLoaded(true);
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes (after initial load)
   useEffect(() => {
-    localStorage.setItem('octocat-cart', JSON.stringify(cart));
-  }, [cart]);
+    if (isLoaded) {
+      localStorage.setItem('octocat-cart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addToCart = (product: Product, quantity: number) => {
     dispatch({ type: 'ADD_TO_CART', payload: { product, quantity } });
